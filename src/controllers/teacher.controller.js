@@ -48,10 +48,81 @@ export const createTeacher = async (req, res) => {
  *       200:
  *         description: List of teachers
  */
+/**
+ * @swagger
+ * /teachers:
+ *   get:
+ *     summary: Get all teachers
+ *     tags: [Teachers]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of records per page
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: asc
+ *         description: Sort order by created time
+ *       - in: query
+ *         name: populate
+ *         schema:
+ *           type: string
+ *         description: Related models to include (e.g., courseId)
+ *     responses:
+ *       200:
+ *         description: List of teachers
+ */
 export const getAllTeachers = async (req, res) => {
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const sort = req.query.sort === 'desc' ? 'DESC' : 'ASC';
+    const populate = req.query.populate;
+
+    // Determine which associations to include
+    let include = [];
+    if (populate) {
+        // Support comma-separated values for multiple relations
+        const relations = populate.split(',').map(r => r.trim());
+        // Map relation names to model associations
+        const associationMap = {
+            courseId: db.Course,
+            teacherId: db.Teacher, // Example, adjust as needed
+            // Add more associations as needed
+        };
+        include = relations
+            .map(rel => associationMap[rel])
+            .filter(Boolean);
+    } else {
+        include = [db.Course]; // Default include
+    }
+
     try {
-        const teachers = await db.Teacher.findAll({ include: db.Course });
-        res.json(teachers);
+        const total = await db.Teacher.count();
+        const teachers = await db.Teacher.findAll({
+            include,
+            limit,
+            offset: (page - 1) * limit,
+            order: [['createdAt', sort]],
+        });
+        res.json({
+            meta: {
+                totalItems: total,
+                page,
+                totalPages: Math.ceil(total / limit),
+            },
+            data: teachers,
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

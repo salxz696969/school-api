@@ -59,22 +59,60 @@ export const createCourse = async (req, res) => {
  *       200:
  *         description: List of courses
  */
+/**
+ * @swagger
+ * /courses:
+ *   get:
+ *     summary: Get all courses
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *         description: Number of items per page
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: asc
+ *         description: Sort order by created time
+ *       - in: query
+ *         name: populate
+ *         schema:
+ *           type: string
+ *           description: Comma-separated related models to include (e.g. "Teacher,Student")
+ *     responses:
+ *       200:
+ *         description: List of courses
+ */
 export const getAllCourses = async (req, res) => {
-
-    // take certain amount at a time
     const limit = parseInt(req.query.limit) || 10;
-    // which page to take
     const page = parseInt(req.query.page) || 1;
+    const sort = req.query.sort === 'desc' ? 'DESC' : 'ASC';
+    const populate = req.query.populate ? req.query.populate.split(',').map(s => s.trim()) : [];
 
-    const total = await db.Course.count();
+    // Map populate values to actual model references
+    const include = [];
+    if (populate.includes('Teacher') || populate.includes('teacherId')) {
+        include.push(db.Teacher);
+    }
+    if (populate.includes('Student') || populate.includes('studentId')) {
+        include.push(db.Student);       
+    }
 
     try {
-        const courses = await db.Course.findAll(
-            {
-                // include: [db.Student, db.Teacher],
-                limit: limit, offset: (page - 1) * limit
-            }
-        );
+        const total = await db.Course.count();
+        const courses = await db.Course.findAll({
+            include,
+            limit,
+            offset: (page - 1) * limit,
+            order: [['createdAt', sort]],
+        });
         res.json({
             meta: {
                 totalItems: total,
