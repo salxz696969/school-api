@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const SECRET = process.env.JWT_SECRET || 'IamJack21';
+const SECRET = process.env.JWT_SECRET || 'chaewon';
 
 const authenticate = (req, res, next)=>{
     const authHeader = req.headers.authorization;
