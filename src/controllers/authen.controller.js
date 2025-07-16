@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import db from "../models/index.js";
 const User = db.User;
 
-const SECRET = process.env.JWT_SECRET || "IamJack21";
+const SECRET = process.env.JWT_SECRET || "chaewon";
 
 /**
  * @swagger
@@ -28,13 +28,13 @@ const SECRET = process.env.JWT_SECRET || "IamJack21";
  *             properties:
  *               name:
  *                 type: string
- *                 example: Ra Fat
+ *                 example: Sao Visal
  *               email:
  *                 type: string
- *                 example: RaFat@gmail.com
+ *                 example: SaoVisal@gmail.com
  *               password:
  *                 type: string
- *                 example: RaFat21
+ *                 example: SaoVisal21
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -74,10 +74,10 @@ export const register = async (req, res) => {
  *             properties:
  *               email:
  *                 type: string
- *                 example: RaFat@gmail.com
+ *                 example: SaoVisal@gmail.com
  *               password:
  *                 type: string
- *                 example: RaFat21
+ *                 example: SaoVisal21
  *     responses:
  *       200:
  *         description: Successful login
