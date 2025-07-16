@@ -7,7 +7,7 @@ const authenticate = (req, res, next)=>{
     if(!authHeader) return res.status(401).json({message: "No token provided"});
 
     const token = authHeader.split(' ')[1];
-    if(!token) return res.status(401).jjson({message: "Token missing"});
+    if(!token) return res.status(401).json({message: "Token missing"});
 
     try{
         const decoded = jwt.verify(token, SECRET);
